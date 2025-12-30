@@ -1,0 +1,30 @@
+const MESSAGE_TYPES = {
+    'SEND':0,
+    'CREATE_ROOM':1,
+    'ROOM_CREATED':2,
+    'ROOM_CREATED_FAILED':3,
+    'MESSAGE_RECEIVED':4
+}
+
+
+const USER_HANDLES = {
+    'NEW_CONNECTION':0,
+    'REMOVE_CONNECTION': 1,
+}
+
+
+
+const MAIN_HANDLERS = {
+    'USER_CONFIG':0,
+    'FILE_SHARE':1,
+    'MESSAGE':2,
+}
+
+
+const ERRORS = {
+    'ROOM_ALREADY_EXISTS':50
+}
+
+
+
+module.exports = {MESSAGE_TYPES,MAIN_HANDLERS,ERRORS,USER_HANDLES}
