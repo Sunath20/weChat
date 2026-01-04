@@ -35,10 +35,50 @@ class Message extends DataClass{
         true,
         []
     );
+
+}
+
+
+
+class MessageMetaData extends DataClass {
+
+
+    getName() {
+        return "message_meta";
+    }
+
+    messageId = createField(
+        types.TEXT,
+        true,
+        true,
+    )
+
+    read = createField(
+        types.BOOLEAN,
+        false,
+        false
+    )
+
+
+    receivedAt = createField(
+        types.DATETIME,
+        false,
+        false
+    )
+
+    readAt = createField(
+        types.DATETIME,
+        false,
+        false
+    )
 }
 
 function createMessageFactory(){
     return new DataClassFactory(Message,{'DATABASE':DATABASE_TYPES.POSTGRES})
 }
 
-module.exports = {Message,createMessageFactory}
+function createMessageMetaDataFactory(){
+    return new DataClassFactory(MessageMetaData,{'DATABASE':DATABASE_TYPES.POSTGRES})
+}
+
+module.exports = {Message,createMessageFactory,createMessageMetaDataFactory,MessageMetaData}

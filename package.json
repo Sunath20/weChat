@@ -13,7 +13,7 @@
     "dotenv": "^17.2.3",
     "express": "~4.16.1",
     "express-ws": "^5.0.2",
-    "fast-express-backend": "1.1.10",
+    "fast-express-backend": "^1.1.14",
     "helmet": "^8.1.0",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",

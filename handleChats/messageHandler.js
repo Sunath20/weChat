@@ -1,12 +1,12 @@
 const {Users} = require("./Users")
 const {createRoomFactory, checkRoomExitsForTwoPersons} = require("../models/Room");
-const {sendSocketData, MAIN_HANDLERS, MESSAGE_TYPES} = require("../utils");
+const {sendSocketData, MAIN_HANDLERS, MESSAGE_TYPES, print} = require("../utils");
 const {Database} = require("fast-express-backend/databases/database");
 const {Databases, DATABASE_TYPES} = require("fast-express-backend/databases");
 const {PostgresqlQuery, ACTION_TYPES} = require("fast-express-backend/query/postgresqlQuery");
 const {Room} = require("../models");
 const {getDB} = require("../utils/database");
-const {createMessageFactory} = require("../models/Message");
+const {createMessageFactory, createMessageMetaDataFactory} = require("../models/Message");
 
 
 class MessageHandler {
@@ -37,7 +37,7 @@ class MessageHandler {
         const data  = {
             from:this.socketHandler.userID,
             to:to,
-            message:payload.message,
+            content:payload.message,
             mainHandler:MAIN_HANDLERS.MESSAGE,
             handlerOne:MESSAGE_TYPES.MESSAGE_RECEIVED
         }
@@ -50,7 +50,16 @@ class MessageHandler {
         }
 
         const messageFactory =  createMessageFactory();
-        await messageFactory.createModelObject(savedData)
+        const obj = (await messageFactory.createModelObject(savedData))[0]
+
+        const messageMeatDataFactory = createMessageMetaDataFactory();
+        await messageMeatDataFactory.createModelObject({
+            messageId:obj['_id'],
+            read:false,
+        })
+
+        data['messageId'] = obj['_id'];
+        data['createdAt'] = obj['createdat']
 
         sendSocketData(JSON.stringify(data),to);
 

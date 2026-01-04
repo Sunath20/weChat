@@ -4,8 +4,9 @@
 
 const {Person} = require('./Person');
 const {Room} = require('./Room');
-const {Message} = require('./Message');
+const {Message, MessageMetaData} = require('./Message');
 const PostgresDatabase =  require("fast-express-backend/databases/postgresql")
+const {print} = require("../utils");
 
 
 /**
@@ -14,11 +15,13 @@ const PostgresDatabase =  require("fast-express-backend/databases/postgresql")
  */
 async function registerAllTables(db){
     await db.createTable(Person);
-    console.log("Person table was created")
+    print("Person Table created")
     await db.createTable(Room);
-    console.log("Room table was created")
+    print("Room Table Created")
     await db.createTable(Message);
-    console.log("Message table was created")
+    print("Message table was created")
+    await db.createTable(MessageMetaData)
+    print("Message meta table was created")
 }
 
 module.exports = {Person,Room,Message,registerAllTables:registerAllTables}
