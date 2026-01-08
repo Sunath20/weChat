@@ -6,7 +6,7 @@ const {Databases, DATABASE_TYPES} = require("fast-express-backend/databases");
 const {PostgresqlQuery, ACTION_TYPES} = require("fast-express-backend/query/postgresqlQuery");
 const {Room} = require("../models");
 const {getDB} = require("../utils/database");
-const {createMessageFactory, createMessageMetaDataFactory} = require("../models/Message");
+const {createMessageFactory, createMessageMetaDataFactory, Message} = require("../models/Message");
 
 
 class MessageHandler {
@@ -16,12 +16,14 @@ class MessageHandler {
         this.socketHandler = socketHandler;
         this.handlers = {
             [MESSAGE_TYPES.SEND] : this.sendMessageToSomeOne.bind(this),
-            [MESSAGE_TYPES.CREATE_ROOM]:this.createRoom.bind(this)
+            [MESSAGE_TYPES.CREATE_ROOM]:this.createRoom.bind(this),
+            [MESSAGE_TYPES.SET_MESSAGE_DELIVERED]:this.setMessageDelivered.bind(this),
+            [MESSAGE_TYPES.SET_LIST_OF_MESSAGE_DELIVERED]:this.setListOfMessageDelivered.bind(this),
+            [MESSAGE_TYPES.SET_SEEN_MESSAGE]:this.setSeenMessage.bind(this)
         }
     }
 
     async handle(payload){
-        console.log(payload)
         const action = payload['handlerOne']
         this.handlers[action](payload);
     }
@@ -52,16 +54,11 @@ class MessageHandler {
         const messageFactory =  createMessageFactory();
         const obj = (await messageFactory.createModelObject(savedData))[0]
 
-        const messageMeatDataFactory = createMessageMetaDataFactory();
-        await messageMeatDataFactory.createModelObject({
-            messageId:obj['_id'],
-            read:false,
-        })
+        const allData = {...data,...obj,friend:to}
 
-        data['messageId'] = obj['_id'];
-        data['createdAt'] = obj['createdat']
-
-        sendSocketData(JSON.stringify(data),to);
+        sendSocketData(JSON.stringify(allData),to);
+        allData['handlerOne'] = MESSAGE_TYPES.GET_BACK_CREATED_MESSAGE
+        sendSocketData(JSON.stringify(allData),this.socketHandler.userID);
 
     }
 
@@ -71,7 +68,6 @@ class MessageHandler {
         const {from,to} = payload;
         const roomFactory = createRoomFactory();
         const data = {personOne:from,personTwo:to}
-        console.log(data, " This is the payload this what we use to create the room")
         const room = await roomFactory.createObject(data)
         const response = await room.validate();
 
@@ -93,6 +89,58 @@ class MessageHandler {
         }
     }
 
+    async setMessageDelivered(payload){
+        const {messageID,time,to} = payload;
+
+
+        const db = getDB()
+
+        await db.update(Message,{_id:messageID},{userReceivedAt:time})
+        sendSocketData(JSON.stringify({
+            mainHandler:MAIN_HANDLERS.MESSAGE,
+            handlerOne:MESSAGE_TYPES.MESSAGE_DELIVERED,
+            changes:{userReceivedAt:time},
+            messageID:messageID,
+            from:this.socketHandler.userID
+        }),to)
+    }
+
+
+
+    async setListOfMessageDelivered(payload){
+        const {to,messageIDList,deliveredTime} = payload;
+        const db = getDB()
+
+        for(let i = 0 ; i < messageIDList.length;i++){
+            const messageID = messageIDList[i]
+            await db.update(Message,{_id:messageID},{userReceivedAt:deliveredTime})
+        }
+
+        const userPayload = {
+            mainHandler:MAIN_HANDLERS.MESSAGE,
+            handlerOne:MESSAGE_TYPES.RECEIVE_LIST_OF_MESSAGE_DELIVERED,
+            messageIDList,
+            deliveredTime,
+            from:this.socketHandler.userID
+        }
+
+        sendSocketData(JSON.stringify(userPayload),to)
+    }
+
+
+    async setSeenMessage(payload){
+        const {to,messageID,seenTime} = payload
+        const db = getDB()
+        await db.update(Message,{_id:messageID},{userReadMessageAt:seenTime,userRead:true})
+        const userPayload = {
+            mainHandler:MAIN_HANDLERS.MESSAGE,
+            handlerOne:MESSAGE_TYPES.RECEIVE_SEEN_MESSAGE,
+            messageID,
+            from:this.socketHandler.userID,
+            changes:{userReadMessageAt:seenTime,userRead:true},
+        }
+        sendSocketData(JSON.stringify(userPayload),to)
+    }
 }
 
 

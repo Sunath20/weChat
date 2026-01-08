@@ -26,10 +26,9 @@ class Room extends DataClass {
 
 
     async validateAllData() {
-        console.log(this['from_data'])
+
         const {personOne, personTwo} = this['form_data'];
         const response = await checkRoomExitsForTwoPersons(personOne,personTwo);
-        console.log(response , " this is the response")
        return new Promise((resolve,reject) => {
            if(response.length === 0){
             resolve({okay:true})

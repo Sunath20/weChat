@@ -36,6 +36,27 @@ class Message extends DataClass{
         []
     );
 
+    userRead = createField(
+        types.BOOLEAN,
+        false,
+        false,
+        []
+    )
+
+    userReceivedAt = createField(
+        types.DATETIME,
+        false,
+        false,
+        []
+    )
+
+    userReadMessageAt = createField(
+        types.DATETIME,
+        false,
+        false,
+        []
+    )
+
 }
 
 
