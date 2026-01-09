@@ -34,9 +34,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const userRouter = require("./routes/user");
 const messagesRouter = require("./routes/messages");
+const fileRouter = require("./routes/files");
 
 app.use("/users",userRouter)
 app.use("/messages",messagesRouter)
+app.use("/files",fileRouter)
 
 app.ws('/', function (ws,req) {
     console.log(req, " This is the req")

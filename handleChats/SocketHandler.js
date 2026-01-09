@@ -2,6 +2,7 @@ const {UserHandler} = require("./UserHandle");
 const {Users} = require("./Users");
 const {MessageHandler} = require("./messageHandler");
 const {MAIN_HANDLERS} = require("../utils");
+const {FileHandler} = require("./fileHandler");
 
 
 class SocketHandler {
@@ -19,10 +20,12 @@ class SocketHandler {
 
         this.userHandler = new UserHandler(this);
         this.messageHandler = new MessageHandler(this);
+        this.fileHandler = new FileHandler(this);
 
         this.handlers = {
             [MAIN_HANDLERS.USER_CONFIG]:this.userHandler,
-            [MAIN_HANDLERS.MESSAGE]:this.messageHandler
+            [MAIN_HANDLERS.MESSAGE]:this.messageHandler,
+            [MAIN_HANDLERS.FILE_SHARE]:this.fileHandler
         }
     }
 
