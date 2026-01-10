@@ -19,7 +19,8 @@ class MessageHandler {
             [MESSAGE_TYPES.CREATE_ROOM]:this.createRoom.bind(this),
             [MESSAGE_TYPES.SET_MESSAGE_DELIVERED]:this.setMessageDelivered.bind(this),
             [MESSAGE_TYPES.SET_LIST_OF_MESSAGE_DELIVERED]:this.setListOfMessageDelivered.bind(this),
-            [MESSAGE_TYPES.SET_SEEN_MESSAGE]:this.setSeenMessage.bind(this)
+            [MESSAGE_TYPES.SET_SEEN_MESSAGE]:this.setSeenMessage.bind(this),
+            [MESSAGE_TYPES.FILE_MESSAGE_SEND_TO_OTHER_USER]:this.notifyFileMessage.bind(this)
         }
     }
 
@@ -140,6 +141,19 @@ class MessageHandler {
             changes:{userReadMessageAt:seenTime,userRead:true},
         }
         sendSocketData(JSON.stringify(userPayload),to)
+    }
+
+    async notifyFileMessage(payload){
+        const {message,to,from} = payload
+        console.log("Receive file message from a user ",message)
+        const data = {
+            mainHandler:MAIN_HANDLERS.MESSAGE,
+            handlerOne:MESSAGE_TYPES.FILE_MESSAGE_RECEIVE_TO_OTHER_USER,
+            message,
+            from
+        }
+        sendSocketData(JSON.stringify(data),to)
+
     }
 }
 

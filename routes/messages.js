@@ -5,7 +5,7 @@ const {MessageMetaData} = require("../models/Message");
 const router = require('express').Router();
 
 
-const commonFieldsToRetrieve = ['_id','content','sentbyid','createdat','userReceivedAt']
+const commonFieldsToRetrieve = ['_id','content','sentbyid','createdat','userReceivedAt','contentType','roomId']
 
 // Get the latest {{limit}} amount of messages
 router.get("/get-messages", async(req, res) => {

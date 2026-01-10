@@ -7,11 +7,12 @@ const bodyParser = require("body-parser");
 
 const router = express.Router();
 const fs = require("node:fs/promises");
+const normalFs = require("fs")
 const {createMessageFactory} = require("../models/Message");
 
 
 router.get("/startFileUpload",async (req,res) => {
-    const {personOne,sentByID,personTwo,fileName} = req.query;
+    const {personOne,sentByID,personTwo,fileName,mimeType} = req.query;
 
     const db = getDB()
     const room = await db.find(Room,{personTwo,personOne})
@@ -21,7 +22,7 @@ router.get("/startFileUpload",async (req,res) => {
         const messageFactory = createMessageFactory();
         const messagePayload = {
             sentById:sentByID,
-            content:fileName,
+            content:JSON.stringify({roomId,fileName,mimeType}),
             roomId,
             contentType:"File"
         }
@@ -31,7 +32,7 @@ router.get("/startFileUpload",async (req,res) => {
         await fs.mkdir(filePath, { recursive: true })
         await fs.writeFile(filePath+"/"+savingFileName,[])
 
-        return res.status(200).json({fileName:savingFileName,filePath:filePath+"/"+savingFileName})
+        return res.status(200).json({fileName:savingFileName,filePath:filePath+"/"+savingFileName,message:msgOBJ})
 
     }
 })
@@ -44,6 +45,19 @@ router.post("/updateFile/media/:roomId/:filename",bodyParser.raw({ type: "applic
     console.log("Writing Chuck Number ",req.headers['x-chunk-index'])
     res.sendStatus(200)
 
+})
+
+
+const BUFFER_SIZE = 1024*1024;
+router.get("/readFile/:roomId/:filename",async (req,res) => {
+    const {filename,roomId} = req.params
+
+    const chunkIndex = req.headers['x-chunk-index'];
+    const filePath = "./media/"+roomId+"/"+filename
+    const file = normalFs.createReadStream(filePath,{highWaterMark:64*1024})
+    res.setHeader('Content-Type', 'application/octet-stream');
+
+    file.pipe(res);
 })
 
 module.exports = router;
