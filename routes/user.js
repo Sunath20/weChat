@@ -50,9 +50,8 @@ const USER_OTP_RECORDS = {}
 
 router.post("/verify-user",async(req,res) => {
     const randomNumber = Math.round(Math.random() * Math.pow(10,6))
-
-    console.log("Rrequest came here")
     const {contactNumber} = req.body;
+    console.log("Latest opt number for ",contactNumber," is "+randomNumber)
     USER_OTP_RECORDS[contactNumber] = randomNumber.toString();
     console.log(USER_OTP_RECORDS , " This is records")
     return res.status(201).json({'sent':"Okay","production":{"otp":randomNumber.toString()}});

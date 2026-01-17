@@ -6,9 +6,11 @@ const {Users} = require("../handleChats/Users");
  * @param args  {String[]} -
  */
 function sendSocketData(data,...args){
+
+        const isBinary = data instanceof Buffer;
         for(let i= 0; i < args.length;i++){
             if(Users.users[args[i]]){
-                Users.users[args[i]].socket.send(data);
+                Users.users[args[i]].socket.send(data,{isBinary});
             }
 
         }

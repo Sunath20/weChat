@@ -14,11 +14,12 @@ var app = require('./app');
 
 
 var debug = require('debug')('wechat:server');
-var http = require('http');
+var https = require('https');
 const {Databases, DATABASE_TYPES} = require("fast-express-backend/databases");
 const {registerAllTables} = require("./models");
 const {WebSocketServer} = require("ws");
 const {SocketHandler} = require("./handleChats");
+const fs = require("fs")
 
 async function setupDatabase(){
     const db = new PostgresDatabase();
@@ -43,11 +44,22 @@ async function setupDatabase(){
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
+// Load SSL certs
+const options = {
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.cert'),
+    minVersion: 'TLSv1.2'
+
+
+};
+
+
+
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var server = https.createServer(options,app);
 
 /**
  * Listen on provided port, on all network interfaces.

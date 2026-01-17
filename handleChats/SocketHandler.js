@@ -1,8 +1,10 @@
 const {UserHandler} = require("./UserHandle");
 const {Users} = require("./Users");
 const {MessageHandler} = require("./messageHandler");
-const {MAIN_HANDLERS} = require("../utils");
+const {MAIN_HANDLERS, sendSocketData} = require("../utils");
 const {FileHandler} = require("./fileHandler");
+const buffer = require("node:buffer");
+const {CallHandler} = require("./callHandler");
 
 
 class SocketHandler {
@@ -21,11 +23,13 @@ class SocketHandler {
         this.userHandler = new UserHandler(this);
         this.messageHandler = new MessageHandler(this);
         this.fileHandler = new FileHandler(this);
+        this.callHandler = new CallHandler()
 
         this.handlers = {
             [MAIN_HANDLERS.USER_CONFIG]:this.userHandler,
             [MAIN_HANDLERS.MESSAGE]:this.messageHandler,
-            [MAIN_HANDLERS.FILE_SHARE]:this.fileHandler
+            [MAIN_HANDLERS.FILE_SHARE]:this.fileHandler,
+            [MAIN_HANDLERS.CALL]:this.callHandler
         }
     }
 
@@ -33,11 +37,10 @@ class SocketHandler {
 
 
     onMessage(msg) {
-        console.log(msg.data , " This is the message")
-        const payload = JSON.parse(msg.data.toString());
-        const handlerType = payload['mainHandler'];
-        this.handlers[handlerType].handle(payload);
 
+            const payload = JSON.parse(msg.data.toString());
+            const handlerType = payload['mainHandler'];
+            this.handlers[handlerType].handle(payload)
     }
 
 
